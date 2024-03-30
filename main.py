@@ -3,10 +3,16 @@ import time
 import pandas as pd
 
 
-def find_max_page(files, path):
+def find_max_page(files: list) -> tuple:
+    """Find max page.
+            :param files: list of filenames in str.
+            :return: (number of page, file name).
+
+    """
+
     files_page = []
     for f in files:
-        df = pd.read_csv(path + f)
+        df = pd.read_csv(PATH + f)
 
         count_page = 0
         for index, row in df.iterrows():
@@ -28,8 +34,13 @@ def find_max_page(files, path):
         
     return max_page, name
 
-def get_product_indexes(from_index, to_index):
-    """  """
+def get_product_indexes(from_index: list, to_index: list) -> list:
+    """Get row indices of products from specified boundary.
+            :param from_index: list of integer of index.
+            :param to_index: list of integer of index.
+            :return: list of indices that lie between the boundary.
+
+    """
 
     product_indexes = []
     for f, t in zip(from_index, to_index):
@@ -37,27 +48,32 @@ def get_product_indexes(from_index, to_index):
 
     return product_indexes
 
-def export_to_xlsx(data, columns, filename):
-    """  """
+def export_to_xlsx(data: list, columns: list, filename: str):
+    """Export data as Excel spreadsheet.
+            :param data: list of entries.
+            :param columns: list of column names.
+            :param filename: name in str.
+            :return: True if success.
 
-    df = pd.DataFrame(data, columns=columns)
-    return df.to_excel(filename, index=False)
+    """
+    try:
+        df = pd.DataFrame(data, columns=columns)
+        df.to_excel(filename, index=False)
+
+        return True
+    except:
+        return False
 
 def main():
-    path = os.getcwd() + "/.env/dataset/"
-
-    product_info_cols = [1, 3, 8, 14, 17, 18, 22]
-    label_name = ["No", "Item Code", "Description", "Qty", "UoM", "Unit Price", "Amount", "PO Ref", "PM Name", "Source File"]
-
     # get list of filename
-    csv_files = os.listdir(path)
+    csv_files = os.listdir(PATH)
     file_in_total = len(csv_files)
 
     data = []
     for seq, filename in enumerate(csv_files, start=1):
         # print(f"============= {filename} =============")
 
-        df = pd.read_csv(path + filename)
+        df = pd.read_csv(PATH + filename)
         df.columns = [i for i in range(0, 23)]
         # print(df)
 
@@ -79,9 +95,9 @@ def main():
             # append only specified row and its sequence number is not `NaN`
             if index in product_indexes and not pd.isna(row[1]):
                 # get vals in columns
-                line = [row[col] for col in product_info_cols]
+                line = [row[col] for col in LABEL_NUMBER]
 
-                # add 2 more columns for `PO Ref` and `PM Name`
+                # add 3 more columns for `PO Ref`, `PM Name`, `Source File`
                 line.extend([po_reference[2:], project_manager_name[2:], filename.split(".")[0]])
 
                 # append
@@ -96,13 +112,18 @@ def main():
 
     # setting output file, and export
     output_filename = 'result.xlsx'
-    export_to_xlsx(data, label_name, output_filename)
+    export_to_xlsx(data, LABEL_NAME, output_filename)
 
     time.sleep(1)
     
     
 if __name__ == "__main__":
     start_time = time.time()
+
+    # Initialize
+    PATH = os.getcwd() + "/.env/dataset/"
+    LABEL_NUMBER = [1, 3, 8, 14, 17, 18, 22]
+    LABEL_NAME = ["No", "Item Code", "Description", "Qty", "UoM", "Unit Price", "Amount", "PO Ref", "PM Name", "Source File"]
     
     # run main function
     main()
