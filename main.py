@@ -121,7 +121,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Initialize
-    PATH = os.getcwd() + "/.env/dataset/"
+    PATH = os.getcwd() + "/dataset/"
     LABEL_NUMBER = [1, 3, 8, 14, 17, 18, 22]
     LABEL_NAME = ["No", "Item Code", "Description", "Qty", "UoM", "Unit Price", "Amount", "PO Ref", "PM Name", "Source File"]
     
