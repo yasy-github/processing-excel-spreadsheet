@@ -57,7 +57,7 @@ def export_to_xlsx(data: list, columns: list, filename: str):
 
     """
     try:
-        df = pd.DataFrame(data)
+        df = pd.DataFrame(data, columns=columns)
         df.to_excel(filename, index=False)
 
         return True
@@ -71,40 +71,36 @@ def main():
 
     data = []
     for seq, filename in enumerate(csv_files, start=1):
-        print(f"============= {filename} =============")
+        # print(f"============= {filename} =============")
 
         df = pd.read_csv(PATH + filename)
-        # df.columns = [i for i in range(0, 21)]
-        # print(df.head(21))
+        df.columns = [i for i in range(0, 23)]
+        # print(df.head(23))
 
         # get header information
-        col_1 = df.loc[2][15]
-        col_2 = df.loc[6][15]
-        col_3 = df.loc[8][15]
-        col_4 = df.loc[13][4]   # memo
+        po_reference = df.loc[2][16]
+        project_manager_name = df.loc[9][16]
         # print(f"PO{po_reference} \tPM{project_manager_name}")
 
         # find boundary
-        # from_index = df.index[df[1] == "No"].tolist()       # get index of `No` which is one of column header in table, for the starting point
-        # to_index = df.index[df[20].notna()].tolist()        # get index of `Page#of#` to consider it as the ending point
+        from_index = df.index[df[1] == "No"].tolist()       # get index of `No` which is one of column header in table, for the starting point
+        to_index = df.index[df[20].notna()].tolist()        # get index of `Page#of#` to consider it as the ending point
         # print("\nBoundary", from_index, "->", to_index)
 
         # get product indexes that lie between boundary
-        # product_indexes = get_product_indexes(from_index, to_index)
+        product_indexes = get_product_indexes(from_index, to_index)
 
         product_lines = []
         for index, row in df.iterrows():
             # append only specified row and its sequence number is not `NaN`
-            # if index in product_indexes and not pd.isna(row[1]):
+            if index in product_indexes and not pd.isna(row[1]):
 
-            if not pd.isna(row[1]) and not pd.isna(row[3]) and not pd.isna(row[6]):
                 # get vals in columns
                 line = [row[col] for col in LABEL_NUMBER]
 
                 # add 3 more columns for `PO Ref`, `PM Name`, `Source File`
                 if row[1] != "No":
-                    # line.extend([po_reference[2:], project_manager_name[2:], filename.split(".")[0]])
-                    line.extend([col_1, col_2, col_3, col_4, filename.split(".")[0]])
+                    line.extend([po_reference[2:], project_manager_name[2:], filename.split(".")[0]])
 
                 # append
                 product_lines.append(line)
@@ -127,13 +123,9 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Initialize
-    # PATH = os.getcwd() + "/dataset/"
-    # LABEL_NUMBER = [1, 3, 8, 14, 17, 18, 22]
-    # LABEL_NAME = ["No", "Item Code", "Description", "Qty", "UoM", "Unit Price", "Amount", "PO Ref", "PM Name", "Source File"]
-
     PATH = os.getcwd() + "/convert/result/"
-    LABEL_NUMBER = [1, 3, 6, 12, 16, 17, 18, 20]
-    LABEL_NAME = ["No", "Item Number", "Item Name", "Acc", "Qty", "Unit", "Unit Price", "Amount", "PO Ref", "PM Name", "Source File"]
+    LABEL_NUMBER = [1, 3, 8, 14, 17, 18, 22]
+    LABEL_NAME = ["No", "Item Code", "Description", "Qty", "UoM", "Unit Price", "Amount", "PO Ref", "PM Name", "Source File"]
     
     # run main function
     main()
