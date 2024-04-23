@@ -58,10 +58,13 @@ def export_to_xlsx(data: list, columns: list, filename: str):
     """
     try:
         df = pd.DataFrame(data)
+        # print("New Dataframe", df)
+        # print("Shape: ", df.shape)
         df.to_excel(filename, index=False)
 
         return True
-    except:
+    except Exception as e:
+        print("Error: ", e)
         return False
 
 def main():
@@ -71,46 +74,65 @@ def main():
 
     data = []
     for seq, filename in enumerate(csv_files, start=1):
-        print(f"============= {filename} =============")
+        print(f"\n============= {filename} =============")
 
         df = pd.read_csv(PATH + filename)
-        # df.columns = [i for i in range(0, 21)]
-        # print(df.head(21))
+        df.columns = [i for i in range(0, df.shape[1])]     # set column based on shape
+        # print(df.head(15))
 
         # get header information
-        col_1 = df.loc[2][15]
-        col_2 = df.loc[6][15]
-        col_3 = df.loc[8][15]
-        col_4 = df.loc[13][4]   # memo
+        col_1 = df.loc[6][35]   # ref
+        col_2 = df.loc[7][37]   # delivery date
+        col_3 = df.loc[9][1]    # date
+        col_4 = df.loc[9][5]    # IR No
+        col_5 = df.loc[9][14]    # Project No
+        col_6 = df.loc[9][25]    # Project Name
+        col_7 = df.loc[10][14]    # Purpose
+        col_8 = df.loc[10][7]    # Code 1
+        col_9 = df.loc[10][9]    # Code 2
+
+        # col_4 = df.loc[13][4]   # memo
+        # print(col_1, col_2, col_3, col_4, col_5, col_6, col_7, col_8, col_9)
         # print(f"PO{po_reference} \tPM{project_manager_name}")
 
         # find boundary
-        # from_index = df.index[df[1] == "No"].tolist()       # get index of `No` which is one of column header in table, for the starting point
-        # to_index = df.index[df[20].notna()].tolist()        # get index of `Page#of#` to consider it as the ending point
+        # if isinstance(row[1], str) and "CODE" in row[1]:
+        from_index = df.index[df[1] == "កូដ\nCODE"].tolist()       # get index of `No` which is one of column header in table, for the starting point
+        # if isinstance(row[1], str) and "Total" in row[1]:
+        to_index = df.index[df[1] == "Total :"].tolist()        # get index of `Page#of#` to consider it as the ending point
         # print("\nBoundary", from_index, "->", to_index)
 
         # get product indexes that lie between boundary
-        # product_indexes = get_product_indexes(from_index, to_index)
+        product_indexes = get_product_indexes(from_index, to_index)
 
         product_lines = []
         for index, row in df.iterrows():
             # append only specified row and its sequence number is not `NaN`
-            # if index in product_indexes and not pd.isna(row[1]):
+            if index in product_indexes and not pd.isna(row[1]):
 
-            if not pd.isna(row[1]) and not pd.isna(row[3]) and not pd.isna(row[6]):
+            # if isinstance(row[1], str) and "Total" in row[1]:
+            #     break
+
+            # if isinstance(row[1], str) and "1" in row[1]:
+                
                 # get vals in columns
                 line = [row[col] for col in LABEL_NUMBER]
 
                 # add 3 more columns for `PO Ref`, `PM Name`, `Source File`
-                if row[1] != "No":
-                    # line.extend([po_reference[2:], project_manager_name[2:], filename.split(".")[0]])
-                    line.extend([col_1, col_2, col_3, col_4, filename.split(".")[0]])
+                # if row[1] != "No":
+
+                # line.extend([po_reference[2:], project_manager_name[2:], filename.split(".")[0]])
+
+                line.extend([col_1, col_2, col_3, col_4, col_5, col_6, col_7, col_8, col_9, filename.split(".")[0]])
 
                 # append
                 product_lines.append(line)
 
         # slicing to remove footer such as `Remark`, `Amount`, `Prepared by`, `Name`, `Date`
-        data.extend(product_lines[:-5])
+        # data.extend(product_lines[:-5])
+        data.extend(product_lines)
+
+        # break
 
         # clear console before printing
         # os.system('cls' if os.name == 'nt' else "printf '\033c'")
@@ -118,7 +140,8 @@ def main():
 
     # setting output file, and export
     output_filename = 'result.xlsx'
-    export_to_xlsx(data, LABEL_NAME, output_filename)
+    res = export_to_xlsx(data, LABEL_NAME, output_filename)
+    print(res)
 
     time.sleep(1)
     
@@ -132,8 +155,8 @@ if __name__ == "__main__":
     # LABEL_NAME = ["No", "Item Code", "Description", "Qty", "UoM", "Unit Price", "Amount", "PO Ref", "PM Name", "Source File"]
 
     PATH = os.getcwd() + "/convert/result/"
-    LABEL_NUMBER = [1, 3, 6, 12, 16, 17, 18, 20]
-    LABEL_NAME = ["No", "Item Number", "Item Name", "Acc", "Qty", "Unit", "Unit Price", "Amount", "PO Ref", "PM Name", "Source File"]
+    LABEL_NUMBER = [1, 3, 5, 11, 15, 17, 20, 22, 25, 26, 29, 34, 37]
+    LABEL_NAME = ["CODE", "ML ID", "ITEM/Description", "Model", "Specification", "Qty", "Unit", "Cost", "Amount", "Master List", "Warehouse", "PO"]
     
     # run main function
     main()
