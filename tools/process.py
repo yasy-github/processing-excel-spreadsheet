@@ -122,12 +122,13 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Initialize
-    PATH = os.getcwd() + "/convert/result/"
-    LABEL_NUMBER = [1, 3, 8, 14, 17, 18, 22]
-    LABEL_NAME = ["No", "Item Code", "Description", "Qty", "UoM", "Unit Price", "Amount", "PO Ref", "PM Name", "Source File"]
+    input_path = os.getcwd() + "/convert/converted_files"
+    output_path = os.getcwd() + "/result"
+    label_number = [1, 3, 8, 15, 19, 20, 24]
+    label_name = ["No", "Item Code", "Description", "Qty", "UoM", "Unit Price", "Amount", "PO Ref", "PM Name", "Source File"]
     
     # run main function
-    generate(PATH, LABEL_NUMBER, LABEL_NAME)
+    generate(input_path, output_path, label_name, label_number)
 
     end_time = time.time()
     execution_time = end_time - start_time
