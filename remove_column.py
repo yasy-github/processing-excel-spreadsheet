@@ -3,8 +3,20 @@ import os
 import argparse
 
 
+"""
+Run script: 
+
+    python3 remove_column.py
+        --filename <filename.xlsx> 
+        --sheet <sheet_name> 
+        --from_col <from_column_name> 
+        --to_col <to_column_name> 
+        --focus <column_name_to_checking>
+"""
+
 def remove_columns(df, from_col, to_col, column_name):
-    """  """
+    """ Remove the interval Columns. """
+
     # get Interval columns
     start = df.columns.get_loc(from_col)
     end = df.columns.get_loc(to_col)
@@ -40,7 +52,5 @@ if __name__ == '__main__':
     # create Dataframe
     df = pd.read_excel(filename, sheet_name=args.sheet)
 
-    # Remove the interval Columns
-    # 
-    # Ex: remove_columns(df, from_col='Reference', to_col='Status')
+    # called function
     remove_columns(df, args.from_col, args.to_col, args.focus)
